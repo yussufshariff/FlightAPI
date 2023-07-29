@@ -2,13 +2,13 @@
 {
     public class FlightModel
     {
-        public string FlightId { get; set; }
-        public string Origin { get; set; }
-        public string Destination { get; set; }
+        public string FlightId { get; set; } = string.Empty;
+        public string Origin { get; set; } = string.Empty;
+        public string Destination { get; set; } = string.Empty;
         public DateTime DepartureDate { get; set; }
         public DateTime ArrivalDate { get; set; }
-        public string Airline { get; set; }
-        public string Aircraft { get; set; }
+        public string Airline { get; set; } = string.Empty;
+        public string Aircraft { get; set; } = string.Empty;
         public int AvailableSeats { get; set; }
         public decimal Price { get; set; }
         public TimeSpan Duration { get; set; }
