@@ -15,7 +15,7 @@ namespace FlightAPI.Controllers
             var booking = bookings.Find(b => b.BookingId == bookingId);
             // can also use FirstOrDefault instead of Find
             if (booking == null)
-                return NotFound();
+                return NotFound("This booking does not exist");
             return Ok(booking);
         }
 
@@ -49,5 +49,20 @@ namespace FlightAPI.Controllers
         {
             return bookings.Count + 1;
         }
+
+
+        [HttpDelete("{BookingId}")]
+        public async Task<ActionResult<List<BookingModel>>> DeleteBooking(int BookingId)
+
+        {
+            var booking = bookings.Find(x => x.BookingId == BookingId);
+            if (booking == null)
+                return NotFound("This booking does not exist");
+            bookings.Remove(booking);
+
+            return Ok("Succesfully deleted");
+        }
+
+
     }
 }
