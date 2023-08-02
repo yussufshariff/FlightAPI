@@ -64,7 +64,6 @@ namespace FlightAPI.Controllers
                 if (string.IsNullOrWhiteSpace(booking.Email))
                     return BadRequest("Contact email is required.");
 
-                booking.BookingId = GetNextBookingId();
                 booking.BookingDate = DateTime.Now;
                 booking.IsCancelled = false;
 
@@ -75,6 +74,7 @@ namespace FlightAPI.Controllers
                 {
                     return NotFound("User not found.");
                 }
+                booking.BookingId = user.Bookings.Count + 1;
                 user.Bookings.Add(booking);
 
 
@@ -85,11 +85,11 @@ namespace FlightAPI.Controllers
                 return StatusCode(500, "An error occurred while processing the booking.");
             }
         }
-        private int GetNextBookingId()
-        {
-            return bookings.Count + 1;
-        }
-
+        /* private int GetNextBookingId()
+         {
+             return user.Bookings.Count + 1;
+         }
+        */
 
         [HttpDelete("{BookingId}")]
         public async Task<ActionResult<List<BookingModel>>> DeleteBooking(int BookingId, int UserId)
