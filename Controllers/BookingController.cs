@@ -91,20 +91,27 @@ namespace FlightAPI.Controllers
         }
 
 
-
-
-
         [HttpDelete("{BookingId}")]
-        public async Task<ActionResult<List<BookingModel>>> DeleteBooking(int BookingId)
+        public async Task<ActionResult<List<BookingModel>>> DeleteBooking(int BookingId, int UserId)
 
         {
-            var booking = bookings.Find(x => x.BookingId == BookingId);
+
+            var user = users.FirstOrDefault(u => u.UserId == UserId);
+            if (user == null)
+            {
+                return NotFound("User not found.");
+            }
+
+            var booking = user.Bookings.Find(x => x.BookingId == BookingId);
             if (booking == null)
                 return NotFound("This booking does not exist");
-            bookings.Remove(booking);
+            user.Bookings.Remove(booking);
 
             return Ok("Succesfully deleted");
+
         }
+
+
 
 
         [HttpGet]
