@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace FlightAPI.Controllers
 
 {
-    [Route("api/[controller]")]
+    [Route("/")]
     [ApiController]
     public class BookingController : ControllerBase
 
@@ -15,8 +15,6 @@ namespace FlightAPI.Controllers
         {
             _logger = logger;
         }
-
-        private static List<BookingModel> bookings = new List<BookingModel>();
 
         private static List<UsersModel> users;
 
@@ -32,24 +30,30 @@ namespace FlightAPI.Controllers
                 Email = "Test",
                 Phone = "07123817823",
                 IsActive = true,
-                Bookings = new List<BookingModel>()
+            },
+             new UsersModel
+            {
+                UserId = 2,
+                UserName = "Michael George",
+                Password = "qwerty12",
+                Email = "Test@gmail.co.ca",
+                Phone = "07123817823",
+                IsActive = true,
             }
-        };
+          };
         }
 
 
-        [HttpGet("{bookingId}")]
-        public ActionResult<BookingModel> GetBookingById(int bookingId)
+        [HttpGet("api/Users")]
+        public async Task<ActionResult<List<UsersModel>>> GetUser(int UserId)
         {
-            var booking = bookings.Find(b => b.BookingId == bookingId);
-            if (booking == null)
-                return NotFound("This booking does not exist");
-            return Ok(booking);
+            var user = users.Find(x => x.UserId == UserId);
+            if (user == null)
+                return NotFound("User not found");
+            return Ok(user);
         }
 
-
-
-        [HttpPost]
+        [HttpPost("api/Bookings")]
         public async Task<ActionResult<List<BookingModel>>> AddBooking(int UserId, BookingModel booking)
         {
 
@@ -78,24 +82,20 @@ namespace FlightAPI.Controllers
                 user.Bookings.Add(booking);
 
 
-                return CreatedAtAction(nameof(GetBookingById), new { bookingId = booking.BookingId }, booking);
+                return CreatedAtAction(nameof(GetUser), new { bookingId = booking.BookingId }, booking);
+
+
             }
             catch (Exception)
             {
                 return StatusCode(500, "An error occurred while processing the booking.");
             }
         }
-        /* private int GetNextBookingId()
-         {
-             return user.Bookings.Count + 1;
-         }
-        */
 
-        [HttpDelete("{BookingId}")]
+        [HttpDelete("api/Bookings")]
         public async Task<ActionResult<List<BookingModel>>> DeleteBooking(int BookingId, int UserId)
 
         {
-
             var user = users.FirstOrDefault(u => u.UserId == UserId);
             if (user == null)
             {
@@ -112,18 +112,26 @@ namespace FlightAPI.Controllers
         }
 
 
+        [HttpPut("api/Bookings/Passengers")]
 
-
-        [HttpGet]
-        public async Task<ActionResult<List<UsersModel>>> GetUser(int UserId)
+        public async Task<ActionResult<List<BookingModel>>> UpdateSeats(int BookingId, int UserId, BookingModel request)
         {
-            var user = users.Find(x => x.UserId == UserId);
+            var user = users.FirstOrDefault(u => u.UserId == UserId);
             if (user == null)
-                return NotFound("User not found");
+            {
+                return NotFound("User not found.");
+            }
+
+            var booking = user.Bookings.Find(x => x.BookingId == BookingId);
+            if (booking == null)
+                return NotFound("This booking does not exist");
+
+            booking.NumPassengers = request.NumPassengers;
+
             return Ok(user);
+
+
         }
-
-
 
     }
 

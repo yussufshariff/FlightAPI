@@ -20,6 +20,14 @@ namespace FlightAPI.Controllers
         }
 
 
+        [HttpPost]
+        public async Task<ActionResult<List<UsersModel>>> CreateNewUser(UsersModel user)
+        {
+            users.Add(user);
+            return Ok(user);
+
+        }
+
     }
 
 
