@@ -1,5 +1,6 @@
 ﻿using FlightAPI.Models;
 using Microsoft.AspNetCore.Mvc;
+using System.Diagnostics;
 
 namespace FlightAPI.Controllers
 
@@ -7,16 +8,15 @@ namespace FlightAPI.Controllers
     [Route("/")]
     [ApiController]
     public class BookingController : ControllerBase
-
     {
-        private readonly ILogger<BookingController> _logger;
+        private readonly DataContext context;
 
-        public BookingController(ILogger<BookingController> logger)
+        public BookingController(DataContext context)
         {
-            _logger = logger;
-        }
+            this.context = context;
 
-        private static List<UsersModel> users;
+        }
+        private readonly static List<UsersModel> users;
 
         static BookingController()
         {
@@ -44,46 +44,38 @@ namespace FlightAPI.Controllers
         }
 
 
-        [HttpGet("api/Users")]
+        [HttpGet("api/Users{UserId}")]
         public async Task<ActionResult<List<UsersModel>>> GetUser(int UserId)
         {
-            var user = users.Find(x => x.UserId == UserId);
+            var user = await this.context.Users.FindAsync(UserId);
             if (user == null)
                 return NotFound("User not found");
             return Ok(user);
         }
 
+
         [HttpPost("api/Bookings")]
         public async Task<ActionResult<List<BookingModel>>> AddBooking(int UserId, BookingModel booking)
         {
-
-            await Task.Delay(100);
 
             try
             {
                 if (booking == null)
                     return BadRequest("Booking data cannot be null.");
-                if (string.IsNullOrWhiteSpace(booking.PassengerName))
-                    return BadRequest("Passenger name is required.");
-                if (string.IsNullOrWhiteSpace(booking.Email))
-                    return BadRequest("Contact email is required.");
 
                 booking.BookingDate = DateTime.Now;
                 booking.IsCancelled = false;
 
-
-
-                var user = users.FirstOrDefault(u => u.UserId == UserId);
+                var user = await this.context.Users.FindAsync(UserId);
                 if (user == null)
                 {
                     return NotFound("User not found.");
                 }
                 booking.BookingId = user.Bookings.Count + 1;
                 user.Bookings.Add(booking);
-
-
-                return CreatedAtAction(nameof(GetUser), new { bookingId = booking.BookingId }, booking);
-
+                Debug.WriteLine(user);
+                await context.SaveChangesAsync();
+                return CreatedAtAction(nameof(AddBooking), new { bookingId = booking.BookingId }, booking);
 
             }
             catch (Exception)
@@ -110,7 +102,6 @@ namespace FlightAPI.Controllers
             return Ok("Succesfully deleted");
 
         }
-
 
         [HttpPut("api/Bookings/Passengers")]
 
