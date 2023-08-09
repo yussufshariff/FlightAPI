@@ -28,8 +28,17 @@ namespace FlightAPI.Data
            .Property(b => b.Price)
            .HasColumnType("decimal(18, 2)");
 
+            modelBuilder.Entity<BookingModel>()
+               .HasOne(b => b.User)
+               .WithMany(u => u.Bookings)
+               .HasForeignKey(b => b.UserId);
 
         }
+
+
+
+
+
         public DbSet<FlightModel> Flights { get; set; }
         public DbSet<BookingModel> Bookings { get; set; }
         public DbSet<UsersModel> Users { get; set; }

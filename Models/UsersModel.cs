@@ -8,7 +8,7 @@
         public string Email { get; set; } = string.Empty;
         public string? Phone { get; set; }
         public bool IsActive { get; set; }
-        public List<BookingModel>? Bookings { get; set; } = new List<BookingModel>();
+        public ICollection<BookingModel> Bookings { get; set; } = new List<BookingModel>();
 
     }
 }

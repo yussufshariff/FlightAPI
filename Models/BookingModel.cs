@@ -11,5 +11,7 @@
         public int NumPassengers { get; set; }
         public decimal TotalPrice { get; set; }
         public bool IsCancelled { get; set; }
+        public UsersModel User { get; set; }
+
     }
 }

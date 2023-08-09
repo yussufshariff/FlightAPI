@@ -1,6 +1,5 @@
 ﻿using FlightAPI.Models;
 using Microsoft.AspNetCore.Mvc;
-using System.Diagnostics;
 
 namespace FlightAPI.Controllers
 
@@ -55,9 +54,8 @@ namespace FlightAPI.Controllers
 
 
         [HttpPost("api/Bookings")]
-        public async Task<ActionResult<List<BookingModel>>> AddBooking(int UserId, BookingModel booking)
+        public async Task<ActionResult<BookingModel>> AddBooking(int UserId, BookingModel booking)
         {
-
             try
             {
                 if (booking == null)
@@ -66,23 +64,25 @@ namespace FlightAPI.Controllers
                 booking.BookingDate = DateTime.Now;
                 booking.IsCancelled = false;
 
-                var user = await this.context.Users.FindAsync(UserId);
+                var user = await context.Users.Include(u => u.Bookings).FirstOrDefaultAsync(u => u.UserId == UserId);
                 if (user == null)
                 {
                     return NotFound("User not found.");
                 }
+
                 booking.BookingId = user.Bookings.Count + 1;
                 user.Bookings.Add(booking);
-                Debug.WriteLine(user);
-                await context.SaveChangesAsync();
-                return CreatedAtAction(nameof(AddBooking), new { bookingId = booking.BookingId }, booking);
 
+                await context.SaveChangesAsync();
+
+                return CreatedAtAction(nameof(AddBooking), new { UserId, bookingId = booking.BookingId }, booking);
             }
             catch (Exception)
             {
                 return StatusCode(500, "An error occurred while processing the booking.");
             }
         }
+
 
         [HttpDelete("api/Bookings")]
         public async Task<ActionResult<List<BookingModel>>> DeleteBooking(int BookingId, int UserId)
@@ -94,7 +94,7 @@ namespace FlightAPI.Controllers
                 return NotFound("User not found.");
             }
 
-            var booking = user.Bookings.Find(x => x.BookingId == BookingId);
+            var booking = user.Bookings.FirstOrDefault(x => x.BookingId == BookingId);
             if (booking == null)
                 return NotFound("This booking does not exist");
             user.Bookings.Remove(booking);
@@ -113,7 +113,7 @@ namespace FlightAPI.Controllers
                 return NotFound("User not found.");
             }
 
-            var booking = user.Bookings.Find(x => x.BookingId == BookingId);
+            var booking = user.Bookings.FirstOrDefault(x => x.BookingId == BookingId);
             if (booking == null)
                 return NotFound("This booking does not exist");
 
