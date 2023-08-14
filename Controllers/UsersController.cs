@@ -18,7 +18,7 @@ namespace FlightAPI.Controllers
 
         }
         [HttpGet("{UserId}")]
-        public async Task<ActionResult<List<UsersModel>>> GetUser(int UserId)
+        public async Task<ActionResult<List<User>>> GetUser(int UserId)
         {
             var user = await this.context.Users.FindAsync(UserId);
             if (user == null)
@@ -28,12 +28,19 @@ namespace FlightAPI.Controllers
 
 
         [HttpPost]
-        public async Task<ActionResult<List<UsersModel>>> CreateNewUser(UsersModel user)
+        public async Task<ActionResult<User>> CreateNewUser(User user)
         {
-            this.context.Users.Add(user);
-            await this.context.SaveChangesAsync();
-            return await this.context.Users.ToListAsync();
+            try
+            {
+                this.context.Users.Add(user);
+                await this.context.SaveChangesAsync();
 
+                return CreatedAtAction(nameof(GetUser), new { userId = user.UserId }, user);
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, "An error occurred while creating the user.");
+            }
         }
 
     }

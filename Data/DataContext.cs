@@ -6,7 +6,6 @@ namespace FlightAPI.Data
     {
         public DataContext(DbContextOptions<DataContext> options) : base(options)
         {
-
         }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -16,32 +15,28 @@ namespace FlightAPI.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<FlightModel>().HasKey(f => f.FlightId);
-            modelBuilder.Entity<BookingModel>().HasKey(b => b.BookingId);
-            modelBuilder.Entity<UsersModel>().HasKey(u => u.UserId);
+            modelBuilder.Entity<Flight>().HasKey(f => f.FlightId);
+            modelBuilder.Entity<Booking>().HasKey(b => b.BookingId);
+            modelBuilder.Entity<User>().HasKey(u => u.UserId);
 
-            modelBuilder.Entity<BookingModel>()
+            modelBuilder.Entity<Booking>()
            .Property(b => b.TotalPrice)
            .HasColumnType("decimal(18, 2)");
 
-            modelBuilder.Entity<FlightModel>()
+            modelBuilder.Entity<Flight>()
            .Property(b => b.Price)
            .HasColumnType("decimal(18, 2)");
 
-            modelBuilder.Entity<BookingModel>()
-               .HasOne(b => b.User)
-               .WithMany(u => u.Bookings)
-               .HasForeignKey(b => b.UserId);
+            modelBuilder.Entity<User>()
+            .HasMany(u => u.Bookings)
+            .WithOne(b => b.User)
+            .HasForeignKey(b => b.UserId);
 
         }
 
-
-
-
-
-        public DbSet<FlightModel> Flights { get; set; }
-        public DbSet<BookingModel> Bookings { get; set; }
-        public DbSet<UsersModel> Users { get; set; }
+        public DbSet<Flight> Flights { get; set; }
+        public DbSet<Booking> Bookings { get; set; }
+        public DbSet<User> Users { get; set; }
 
     }
 }

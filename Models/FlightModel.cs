@@ -1,6 +1,6 @@
 ﻿namespace FlightAPI.Models
 {
-    public class FlightModel
+    public class Flight
     {
         public string FlightId { get; set; } = string.Empty;
         public string Origin { get; set; } = string.Empty;

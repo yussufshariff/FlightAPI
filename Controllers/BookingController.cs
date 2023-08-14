@@ -1,5 +1,7 @@
 ﻿using FlightAPI.Models;
 using Microsoft.AspNetCore.Mvc;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace FlightAPI.Controllers
 
@@ -15,13 +17,13 @@ namespace FlightAPI.Controllers
             this.context = context;
 
         }
-        private readonly static List<UsersModel> users;
+        private readonly static List<User> users;
 
         static BookingController()
         {
-            users = new List<UsersModel>
+            users = new List<User>
         {
-            new UsersModel
+            new User
             {
                 UserId = 1,
                 UserName = "USERCONTROLLER",
@@ -30,7 +32,7 @@ namespace FlightAPI.Controllers
                 Phone = "07123817823",
                 IsActive = true,
             },
-             new UsersModel
+             new User
             {
                 UserId = 2,
                 UserName = "Michael George",
@@ -44,7 +46,7 @@ namespace FlightAPI.Controllers
 
 
         [HttpGet("api/Users{UserId}")]
-        public async Task<ActionResult<List<UsersModel>>> GetUser(int UserId)
+        public async Task<ActionResult<List<User>>> GetUser(int UserId)
         {
             var user = await this.context.Users.FindAsync(UserId);
             if (user == null)
@@ -54,26 +56,44 @@ namespace FlightAPI.Controllers
 
 
         [HttpPost("api/Bookings")]
-        public async Task<ActionResult<BookingModel>> AddBooking(int UserId, BookingModel booking)
+        public async Task<ActionResult<Booking>> AddBooking(int UserId, Booking booking)
         {
             try
             {
-                if (booking == null)
-                    return BadRequest("Booking data cannot be null.");
-
-                booking.BookingDate = DateTime.Now;
-                booking.IsCancelled = false;
-
                 var user = await context.Users.Include(u => u.Bookings).FirstOrDefaultAsync(u => u.UserId == UserId);
                 if (user == null)
                 {
                     return NotFound("User not found.");
                 }
 
+                if (booking == null)
+                    return BadRequest("Booking data cannot be null.");
+
+                booking.BookingDate = DateTime.Now;
+                booking.IsCancelled = false;
+                booking.UserId = UserId;
+
                 booking.BookingId = user.Bookings.Count + 1;
                 user.Bookings.Add(booking);
 
-                await context.SaveChangesAsync();
+                try
+                {
+                    await context.SaveChangesAsync();
+                }
+                catch (DbUpdateConcurrencyException ex)
+                {
+                    ex.Entries.Single().Reload();
+                    await context.SaveChangesAsync();
+                    user.RowVersion = BitConverter.GetBytes(DateTime.UtcNow.Ticks);
+                    await context.SaveChangesAsync();
+                }
+
+                var options = new JsonSerializerOptions
+                {
+                    ReferenceHandler = ReferenceHandler.Preserve
+                };
+
+                var serializedBooking = JsonSerializer.Serialize(booking, options);
 
                 return CreatedAtAction(nameof(AddBooking), new { UserId, bookingId = booking.BookingId }, booking);
             }
@@ -84,8 +104,10 @@ namespace FlightAPI.Controllers
         }
 
 
+
+
         [HttpDelete("api/Bookings")]
-        public async Task<ActionResult<List<BookingModel>>> DeleteBooking(int BookingId, int UserId)
+        public async Task<ActionResult<List<Booking>>> DeleteBooking(int BookingId, int UserId)
 
         {
             var user = users.FirstOrDefault(u => u.UserId == UserId);
@@ -105,7 +127,7 @@ namespace FlightAPI.Controllers
 
         [HttpPut("api/Bookings/Passengers")]
 
-        public async Task<ActionResult<List<BookingModel>>> UpdateSeats(int BookingId, int UserId, BookingModel request)
+        public async Task<ActionResult<List<Booking>>> UpdateSeats(int BookingId, int UserId, Booking request)
         {
             var user = users.FirstOrDefault(u => u.UserId == UserId);
             if (user == null)

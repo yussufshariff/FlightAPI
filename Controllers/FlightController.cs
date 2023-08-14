@@ -18,14 +18,14 @@ namespace FlightAPI.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<List<FlightModel>>> GetAllFlights()
+        public async Task<ActionResult<List<Flight>>> GetAllFlights()
         {
             return Ok(await this.context.Flights.ToListAsync());
         }
 
         [HttpGet("{FlightId}")]
 
-        public async Task<ActionResult<List<FlightModel>>> GetSingleFlight(string FlightId)
+        public async Task<ActionResult<List<Flight>>> GetSingleFlight(string FlightId)
         {
             var flight = await this.context.Flights.FindAsync(FlightId);
             if (flight == null)

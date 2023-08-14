@@ -22,7 +22,7 @@ namespace FlightAPI.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("FlightAPI.Models.BookingModel", b =>
+            modelBuilder.Entity("FlightAPI.Models.Booking", b =>
                 {
                     b.Property<int>("BookingId")
                         .ValueGeneratedOnAdd()
@@ -51,6 +51,12 @@ namespace FlightAPI.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
                     b.Property<decimal>("TotalPrice")
                         .HasColumnType("decimal(18, 2)");
 
@@ -64,7 +70,7 @@ namespace FlightAPI.Migrations
                     b.ToTable("Bookings");
                 });
 
-            modelBuilder.Entity("FlightAPI.Models.FlightModel", b =>
+            modelBuilder.Entity("FlightAPI.Models.Flight", b =>
                 {
                     b.Property<string>("FlightId")
                         .HasColumnType("nvarchar(450)");
@@ -105,7 +111,7 @@ namespace FlightAPI.Migrations
                     b.ToTable("Flights");
                 });
 
-            modelBuilder.Entity("FlightAPI.Models.UsersModel", b =>
+            modelBuilder.Entity("FlightAPI.Models.User", b =>
                 {
                     b.Property<int>("UserId")
                         .ValueGeneratedOnAdd()
@@ -127,6 +133,12 @@ namespace FlightAPI.Migrations
                     b.Property<string>("Phone")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
                     b.Property<string>("UserName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -136,9 +148,9 @@ namespace FlightAPI.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("FlightAPI.Models.BookingModel", b =>
+            modelBuilder.Entity("FlightAPI.Models.Booking", b =>
                 {
-                    b.HasOne("FlightAPI.Models.UsersModel", "User")
+                    b.HasOne("FlightAPI.Models.User", "User")
                         .WithMany("Bookings")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -147,7 +159,7 @@ namespace FlightAPI.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("FlightAPI.Models.UsersModel", b =>
+            modelBuilder.Entity("FlightAPI.Models.User", b =>
                 {
                     b.Navigation("Bookings");
                 });
