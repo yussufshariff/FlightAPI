@@ -1,7 +1,5 @@
 ﻿using FlightAPI.Models;
 using Microsoft.AspNetCore.Mvc;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 
 namespace FlightAPI.Controllers
 
@@ -17,53 +15,52 @@ namespace FlightAPI.Controllers
             this.context = context;
 
         }
-        private readonly static List<User> users;
 
-        static BookingController()
+        [HttpGet("api/Bookings")]
+        public async Task<ActionResult<Booking>> GetBooking(int UserId, int BookingId, string FlightId)
         {
-            users = new List<User>
-        {
-            new User
-            {
-                UserId = 1,
-                UserName = "USERCONTROLLER",
-                Password = "Test",
-                Email = "Test",
-                Phone = "07123817823",
-                IsActive = true,
-            },
-             new User
-            {
-                UserId = 2,
-                UserName = "Michael George",
-                Password = "qwerty12",
-                Email = "Test@gmail.co.ca",
-                Phone = "07123817823",
-                IsActive = true,
-            }
-          };
-        }
-
-
-        [HttpGet("api/Users{UserId}")]
-        public async Task<ActionResult<List<User>>> GetUser(int UserId)
-        {
-            var user = await this.context.Users.FindAsync(UserId);
+            var user = this.context.Users.FirstOrDefault(u => u.UserId == UserId);
             if (user == null)
                 return NotFound("User not found");
-            return Ok(user);
+
+            var booking = await this.context.Bookings.FindAsync(BookingId);
+            if (booking == null)
+                return NotFound("Booking not found");
+
+            var flight = await this.context.Flights.FindAsync(FlightId);
+            if (flight == null)
+            {
+                return NotFound("Flight not found");
+            }
+            else
+            {
+                booking.Flight = flight;
+
+            }
+
+            if (!string.Equals(booking.FlightId, FlightId, StringComparison.OrdinalIgnoreCase))
+            {
+                return BadRequest("Wrong flight for this booking");
+            }
+
+            return Ok(booking);
         }
 
-
         [HttpPost("api/Bookings")]
-        public async Task<ActionResult<Booking>> AddBooking(int UserId, Booking booking)
+        public async Task<ActionResult<Booking>> AddBooking(int UserId, string FlightId, Booking booking)
         {
             try
             {
-                var user = await context.Users.Include(u => u.Bookings).FirstOrDefaultAsync(u => u.UserId == UserId);
+                var user = this.context.Users.FirstOrDefault(u => u.UserId == UserId);
                 if (user == null)
                 {
                     return NotFound("User not found.");
+                }
+
+                var flight = this.context.Flights.FirstOrDefault(f => f.FlightId == FlightId);
+                if (flight == null)
+                {
+                    return NotFound("Flight not found.");
                 }
 
                 if (booking == null)
@@ -72,30 +69,17 @@ namespace FlightAPI.Controllers
                 booking.BookingDate = DateTime.Now;
                 booking.IsCancelled = false;
                 booking.UserId = UserId;
+                booking.FlightId = FlightId;
+                booking.User = user;
+                booking.Flight = flight;
 
-                booking.BookingId = user.Bookings.Count + 1;
-                user.Bookings.Add(booking);
+                booking.TotalPrice = flight.Price;
 
-                try
-                {
-                    await context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException ex)
-                {
-                    ex.Entries.Single().Reload();
-                    await context.SaveChangesAsync();
-                    user.RowVersion = BitConverter.GetBytes(DateTime.UtcNow.Ticks);
-                    await context.SaveChangesAsync();
-                }
-
-                var options = new JsonSerializerOptions
-                {
-                    ReferenceHandler = ReferenceHandler.Preserve
-                };
-
-                var serializedBooking = JsonSerializer.Serialize(booking, options);
+                this.context.Bookings.Add(booking);
+                await this.context.SaveChangesAsync();
 
                 return CreatedAtAction(nameof(AddBooking), new { UserId, bookingId = booking.BookingId }, booking);
+
             }
             catch (Exception)
             {
@@ -104,44 +88,50 @@ namespace FlightAPI.Controllers
         }
 
 
-
-
         [HttpDelete("api/Bookings")]
         public async Task<ActionResult<List<Booking>>> DeleteBooking(int BookingId, int UserId)
 
         {
-            var user = users.FirstOrDefault(u => u.UserId == UserId);
+            var user = this.context.Users.FirstOrDefaultAsync(u => u.UserId == UserId);
             if (user == null)
             {
                 return NotFound("User not found.");
             }
 
-            var booking = user.Bookings.FirstOrDefault(x => x.BookingId == BookingId);
+            var booking = this.context.Bookings.FirstOrDefault(x => x.BookingId == BookingId);
+
             if (booking == null)
+            {
                 return NotFound("This booking does not exist");
-            user.Bookings.Remove(booking);
+            }
+
+            this.context.Bookings.Remove(booking);
+            await this.context.SaveChangesAsync();
+
 
             return Ok("Succesfully deleted");
 
         }
 
-        [HttpPut("api/Bookings/Passengers")]
+        [HttpPut("api/Bookings")]
 
-        public async Task<ActionResult<List<Booking>>> UpdateSeats(int BookingId, int UserId, Booking request)
+        public async Task<ActionResult<List<Booking>>> CancelBooking(int BookingId, int UserId, Booking request)
         {
-            var user = users.FirstOrDefault(u => u.UserId == UserId);
+            var user = this.context.Users.FirstOrDefault(u => u.UserId == UserId);
             if (user == null)
             {
                 return NotFound("User not found.");
             }
 
-            var booking = user.Bookings.FirstOrDefault(x => x.BookingId == BookingId);
+            var booking = this.context.Bookings.FirstOrDefault(x => x.BookingId == BookingId);
             if (booking == null)
                 return NotFound("This booking does not exist");
 
-            booking.NumPassengers = request.NumPassengers;
+            booking.IsCancelled = request.IsCancelled;
 
-            return Ok(user);
+            await this.context.SaveChangesAsync();
+
+            return Ok(booking);
 
 
         }

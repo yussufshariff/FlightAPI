@@ -27,10 +27,6 @@ namespace FlightAPI.Data
            .Property(b => b.Price)
            .HasColumnType("decimal(18, 2)");
 
-            modelBuilder.Entity<User>()
-            .HasMany(u => u.Bookings)
-            .WithOne(b => b.User)
-            .HasForeignKey(b => b.UserId);
 
         }
 

@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace FlightAPI.Models
+﻿namespace FlightAPI.Models
 {
     public class User
     {
@@ -10,9 +8,5 @@ namespace FlightAPI.Models
         public string Email { get; set; } = string.Empty;
         public string? Phone { get; set; }
         public bool IsActive { get; set; }
-        public ICollection<Booking> Bookings { get; set; }
-        [ConcurrencyCheck]
-        [Timestamp]
-        public byte[] RowVersion { get; set; }
     }
 }

@@ -4,6 +4,7 @@ using FlightAPI.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FlightAPI.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20230814122706_BookingRemoveFromUser")]
+    partial class BookingRemoveFromUser
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -33,14 +36,23 @@ namespace FlightAPI.Migrations
                     b.Property<DateTime>("BookingDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("FlightId")
-                        .HasColumnType("nvarchar(450)");
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("IsCancelled")
                         .HasColumnType("bit");
 
                     b.Property<int>("NumPassengers")
                         .HasColumnType("int");
+
+                    b.Property<string>("PassengerName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("TotalPrice")
                         .HasColumnType("decimal(18, 2)");
@@ -49,8 +61,6 @@ namespace FlightAPI.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("BookingId");
-
-                    b.HasIndex("FlightId");
 
                     b.HasIndex("UserId");
 
@@ -131,17 +141,11 @@ namespace FlightAPI.Migrations
 
             modelBuilder.Entity("FlightAPI.Models.Booking", b =>
                 {
-                    b.HasOne("FlightAPI.Models.Flight", "Flight")
-                        .WithMany()
-                        .HasForeignKey("FlightId");
-
                     b.HasOne("FlightAPI.Models.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Flight");
 
                     b.Navigation("User");
                 });

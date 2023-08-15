@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FlightAPI.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20230814004359_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20230814121950_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -54,12 +54,6 @@ namespace FlightAPI.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<byte[]>("RowVersion")
-                        .IsConcurrencyToken()
-                        .IsRequired()
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("rowversion");
-
                     b.Property<decimal>("TotalPrice")
                         .HasColumnType("decimal(18, 2)");
 
@@ -68,7 +62,8 @@ namespace FlightAPI.Migrations
 
                     b.HasKey("BookingId");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("UserId")
+                        .IsUnique();
 
                     b.ToTable("Bookings");
                 });
@@ -136,12 +131,6 @@ namespace FlightAPI.Migrations
                     b.Property<string>("Phone")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<byte[]>("RowVersion")
-                        .IsConcurrencyToken()
-                        .IsRequired()
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("rowversion");
-
                     b.Property<string>("UserName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -154,8 +143,8 @@ namespace FlightAPI.Migrations
             modelBuilder.Entity("FlightAPI.Models.Booking", b =>
                 {
                     b.HasOne("FlightAPI.Models.User", "User")
-                        .WithMany("Bookings")
-                        .HasForeignKey("UserId")
+                        .WithOne("Bookings")
+                        .HasForeignKey("FlightAPI.Models.Booking", "UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

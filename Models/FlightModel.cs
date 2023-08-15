@@ -1,4 +1,6 @@
-﻿namespace FlightAPI.Models
+﻿using System.Text.Json.Serialization;
+
+namespace FlightAPI.Models
 {
     public class Flight
     {
@@ -11,6 +13,7 @@
         public string Aircraft { get; set; } = string.Empty;
         public int AvailableSeats { get; set; }
         public decimal Price { get; set; }
+        [JsonIgnore]
         public TimeSpan Duration { get; set; }
     }
 }
