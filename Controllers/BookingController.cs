@@ -17,34 +17,33 @@ namespace FlightAPI.Controllers
         }
 
         [HttpGet("api/Bookings")]
-        public async Task<ActionResult<Booking>> GetBooking(int UserId, int BookingId, string FlightId)
+        public ActionResult<IEnumerable<Booking>> GetBooking(int UserId)
         {
             var user = this.context.Users.FirstOrDefault(u => u.UserId == UserId);
             if (user == null)
                 return NotFound("User not found");
 
-            var booking = await this.context.Bookings.FindAsync(BookingId);
-            if (booking == null)
-                return NotFound("Booking not found");
+            var bookings = this.context.Bookings
+                .Where(b => b.UserId == UserId)
+                .ToList();
+            /* var bookings = this.context.Bookings
+                 .Include(b => b.Flight) // Eagerly load the Flight entity
+                 .Where(b => b.UserId == UserId)
+                 .ToList(); */
+            if (!bookings.Any())
+                return NotFound("Bookings not found");
 
-            var flight = await this.context.Flights.FindAsync(FlightId);
-            if (flight == null)
+            foreach (var booking in bookings)
             {
-                return NotFound("Flight not found");
-            }
-            else
-            {
-                booking.Flight = flight;
-
-            }
-
-            if (!string.Equals(booking.FlightId, FlightId, StringComparison.OrdinalIgnoreCase))
-            {
-                return BadRequest("Wrong flight for this booking");
+                // Explicitly load the Flight entity for each booking
+                context.Entry(booking).Reference(b => b.Flight).Load();
             }
 
-            return Ok(booking);
+            return bookings;
         }
+
+
+
 
         [HttpPost("api/Bookings")]
         public async Task<ActionResult<Booking>> AddBooking(int UserId, string FlightId, Booking booking)
@@ -113,7 +112,7 @@ namespace FlightAPI.Controllers
 
         }
 
-        [HttpPut("api/Bookings")]
+        [HttpPatch("api/Bookings")]
 
         public async Task<ActionResult<List<Booking>>> CancelBooking(int BookingId, int UserId, Booking request)
         {
