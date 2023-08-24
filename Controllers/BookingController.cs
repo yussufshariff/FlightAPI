@@ -50,13 +50,13 @@ namespace FlightAPI.Controllers
         {
             try
             {
-                var user = this.context.Users.FirstOrDefault(u => u.UserId == UserId);
+                var user = await this.context.Users.FirstOrDefaultAsync(u => u.UserId == UserId);
                 if (user == null)
                 {
                     return NotFound("User not found.");
                 }
 
-                var flight = this.context.Flights.FirstOrDefault(f => f.FlightId == FlightId);
+                var flight = await this.context.Flights.FirstOrDefaultAsync(f => f.FlightId == FlightId);
                 if (flight == null)
                 {
                     return NotFound("Flight not found.");
@@ -91,13 +91,13 @@ namespace FlightAPI.Controllers
         public async Task<ActionResult<List<Booking>>> DeleteBooking(int BookingId, int UserId)
 
         {
-            var user = this.context.Users.FirstOrDefaultAsync(u => u.UserId == UserId);
+            var user = await this.context.Users.FirstOrDefaultAsync(u => u.UserId == UserId);
             if (user == null)
             {
                 return NotFound("User not found.");
             }
 
-            var booking = this.context.Bookings.FirstOrDefault(x => x.BookingId == BookingId);
+            var booking = await this.context.Bookings.FirstOrDefaultAsync(x => x.BookingId == BookingId);
 
             if (booking == null)
             {
@@ -116,13 +116,13 @@ namespace FlightAPI.Controllers
 
         public async Task<ActionResult<List<Booking>>> CancelBooking(int BookingId, int UserId, Booking request)
         {
-            var user = this.context.Users.FirstOrDefault(u => u.UserId == UserId);
+            var user = await this.context.Users.FirstOrDefaultAsync(u => u.UserId == UserId);
             if (user == null)
             {
                 return NotFound("User not found.");
             }
 
-            var booking = this.context.Bookings.FirstOrDefault(x => x.BookingId == BookingId);
+            var booking = await this.context.Bookings.FirstOrDefaultAsync(x => x.BookingId == BookingId);
             if (booking == null)
                 return NotFound("This booking does not exist");
 
