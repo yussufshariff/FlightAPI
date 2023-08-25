@@ -1,5 +1,4 @@
-﻿using FlightAPI.Models;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 
 namespace FlightAPI.Controllers
 {
@@ -10,40 +9,44 @@ namespace FlightAPI.Controllers
 
         private readonly DataContext context;
 
-        public FlightController(DataContext context)
+        private readonly IFlightService flightService;
+
+        public FlightController(IFlightService flightService)
         {
-            this.context = context;
+            this.flightService = flightService;
         }
+
 
         [HttpGet("api/Flights")]
         public async Task<ActionResult<List<Flight>>> GetAllFlights()
         {
-            return Ok(await this.context.Flights.ToListAsync());
+            return await this.flightService.GetAllFlights();
         }
 
         [HttpGet("api/FlightFilter")]
         public async Task<ActionResult<List<Flight>>> GetFlightsByMonthRange(int startYear, int startMonth, int endYear, int endMonth)
         {
-            var filteredFlights = await context.Flights
-                .Where(f =>
-                    (f.DepartureDate.Year == startYear && f.DepartureDate.Month >= startMonth) ||
-                    (f.DepartureDate.Year == endYear && f.DepartureDate.Month <= endMonth) ||
-                    (f.DepartureDate.Year > startYear && f.DepartureDate.Year < endYear))
-                .ToListAsync();
+            var flights = await this.flightService.GetFlightsByMonthRange(startYear, startMonth, endYear, endMonth);
 
-            return Ok(filteredFlights);
+            if (flights == null)
+                return NotFound("No flights found.");
+
+            return Ok(flights);
         }
 
 
 
         [HttpGet("api/Flight/{FlightId}")]
 
-        public async Task<ActionResult<List<Flight>>> GetSingleFlight(string FlightId)
+        public async Task<ActionResult<Flight>> GetSingleFlight(string FlightId)
         {
-            var flight = await this.context.Flights.FindAsync(FlightId);
+            var flight = await this.flightService.GetSingleFlight(FlightId);
+
             if (flight == null)
-                return NotFound("Invalid flight number");
+                return NotFound("No flights found.");
+
             return Ok(flight);
+
         }
 
 
