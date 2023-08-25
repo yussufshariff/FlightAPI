@@ -1,5 +1,4 @@
-﻿using FlightAPI.Models;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 
 namespace FlightAPI.Controllers
 {
@@ -11,16 +10,19 @@ namespace FlightAPI.Controllers
 
         private readonly DataContext context;
 
-        public UsersController(DataContext context)
+        private readonly IUserService userService;
+
+
+        public UsersController(IUserService userService)
         {
-            this.context = context;
+            this.userService = userService;
 
 
         }
         [HttpGet("{UserId}")]
         public async Task<ActionResult<List<User>>> GetUser(int UserId)
         {
-            var user = await this.context.Users.FindAsync(UserId);
+            var user = await this.userService.GetUser(UserId);
             if (user == null)
                 return NotFound("User not found");
             return Ok(user);
@@ -32,14 +34,21 @@ namespace FlightAPI.Controllers
         {
             try
             {
-                this.context.Users.Add(user);
-                await this.context.SaveChangesAsync();
+                var newUser = await this.userService.CreateNewUser(user);
 
-                return CreatedAtAction(nameof(GetUser), new { userId = user.UserId }, user);
+                return CreatedAtAction(nameof(GetUser), new { id = newUser.UserId }, newUser);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (ArgumentNullException ex)
+            {
+                return BadRequest(ex.Message);
             }
             catch (Exception)
             {
-                return StatusCode(500, "An error occurred while creating the user.");
+                return StatusCode(500, "An error occurred while processing creating a new user.");
             }
         }
 

@@ -2,6 +2,7 @@ global using FlightAPI.Data;
 global using FlightAPI.Models;
 global using FlightAPI.Services.BookingService;
 global using FlightAPI.Services.FlightService;
+global using FlightAPI.Services.UserService;
 global using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,6 +16,7 @@ builder.Services.AddDbContext<DataContext>(options =>
 });
 builder.Services.AddScoped<IBookingService, BookingService>();
 builder.Services.AddScoped<IFlightService, FlightService>();
+builder.Services.AddScoped<IUserService, UserService>();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
