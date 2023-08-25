@@ -37,35 +37,16 @@ public class BookingController : ControllerBase
     {
         try
         {
-            var user = await this.context.Users.FirstOrDefaultAsync(u => u.UserId == UserId);
-            if (user == null)
-            {
-                return NotFound("User not found.");
-            }
-
-            var flight = await this.context.Flights.FirstOrDefaultAsync(f => f.FlightId == FlightId);
-            if (flight == null)
-            {
-                return NotFound("Flight not found.");
-            }
-
-            if (booking == null)
-                return BadRequest("Booking data cannot be null.");
-
-            booking.BookingDate = DateTime.Now;
-            booking.IsCancelled = false;
-            booking.UserId = UserId;
-            booking.FlightId = FlightId;
-            booking.User = user;
-            booking.Flight = flight;
-
-            booking.TotalPrice = flight.Price;
-
-            this.context.Bookings.Add(booking);
-            await this.context.SaveChangesAsync();
-
-            return CreatedAtAction(nameof(AddBooking), new { UserId, bookingId = booking.BookingId }, booking);
-
+            var addedBooking = await this.bookingService.AddBooking(UserId, FlightId, booking);
+            return CreatedAtAction(nameof(AddBooking), new { UserId, bookingId = addedBooking.BookingId }, addedBooking);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return NotFound(ex.Message);
+        }
+        catch (ArgumentNullException ex)
+        {
+            return BadRequest(ex.Message);
         }
         catch (Exception)
         {
@@ -74,53 +55,50 @@ public class BookingController : ControllerBase
     }
 
 
+
     [HttpDelete("api/Bookings")]
     public async Task<ActionResult<List<Booking>>> DeleteBooking(int BookingId, int UserId)
-
     {
-        var user = await this.context.Users.FirstOrDefaultAsync(u => u.UserId == UserId);
-        if (user == null)
+        try
         {
-            return NotFound("User not found.");
+            var remainingBookings = await this.bookingService.DeleteBooking(BookingId, UserId);
+            if (remainingBookings == null)
+            {
+                return NotFound("This booking does not exist");
+            }
+
+            return Ok("Successfully deleted");
         }
-
-        var booking = await this.context.Bookings.FirstOrDefaultAsync(x => x.BookingId == BookingId);
-
-        if (booking == null)
+        catch (InvalidOperationException ex)
         {
-            return NotFound("This booking does not exist");
+            return NotFound(ex.Message);
         }
-
-        this.context.Bookings.Remove(booking);
-        await this.context.SaveChangesAsync();
-
-
-        return Ok("Succesfully deleted");
-
+        catch (Exception)
+        {
+            return StatusCode(500, "An error occurred while deleting the booking.");
+        }
     }
+
+
 
     [HttpPatch("api/Bookings")]
-
-    public async Task<ActionResult<List<Booking>>> CancelBooking(int BookingId, int UserId, Booking request)
+    public async Task<ActionResult<Booking>> CancelBooking(int BookingId, int UserId, Booking request)
     {
-        var user = await this.context.Users.FirstOrDefaultAsync(u => u.UserId == UserId);
-        if (user == null)
+        try
         {
-            return NotFound("User not found.");
+            var updatedBooking = await this.bookingService.CancelBooking(BookingId, UserId, request);
+            return Ok(updatedBooking);
         }
-
-        var booking = await this.context.Bookings.FirstOrDefaultAsync(x => x.BookingId == BookingId);
-        if (booking == null)
-            return NotFound("This booking does not exist");
-
-        booking.IsCancelled = request.IsCancelled;
-
-        await this.context.SaveChangesAsync();
-
-        return Ok(booking);
-
-
+        catch (InvalidOperationException ex)
+        {
+            return NotFound(ex.Message);
+        }
+        catch (Exception)
+        {
+            return StatusCode(500, "An error occurred while canceling the booking.");
+        }
     }
+
 
 }
 
