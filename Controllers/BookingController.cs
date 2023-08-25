@@ -1,5 +1,5 @@
-﻿using FlightAPI.Services.BookingService;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
+
 namespace FlightAPI.Controllers;
 
 
@@ -11,40 +11,25 @@ public class BookingController : ControllerBase
 
     private readonly IBookingService bookingService;
 
-    public BookingController(DataContext context)
+    public BookingController(IBookingService bookingService)
     {
-        this.context = context;
-
+        this.bookingService = bookingService;
     }
+
 
 
     [HttpGet("api/Bookings")]
-    public ActionResult<IEnumerable<Booking>> GetBooking(int UserId)
+    public async Task<ActionResult<IEnumerable<Booking>>> GetBooking(int UserId)
     {
-        var user = this.context.Users.FirstOrDefault(u => u.UserId == UserId);
-        if (user == null)
-            return NotFound("User not found");
+        var bookings = await this.bookingService.GetBooking(UserId);
 
-        var bookings = this.context.Bookings
-            .Where(b => b.UserId == UserId)
-            .ToList();
-        /* var bookings = this.context.Bookings
-             .Include(b => b.Flight) // Eagerly load the Flight entity
-             .Where(b => b.UserId == UserId)
-             .ToList(); */
-        if (!bookings.Any())
-            return NotFound("Bookings not found");
-
-        foreach (var booking in bookings)
+        if (bookings == null)
         {
-            // Explicitly load the Flight entity for each booking
-            context.Entry(booking).Reference(b => b.Flight).Load();
+            return NotFound("No bookings for this user.");
         }
 
-        return bookings;
+        return Ok(bookings);
     }
-
-
 
 
     [HttpPost("api/Bookings")]

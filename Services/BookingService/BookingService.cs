@@ -1,33 +1,48 @@
-﻿namespace FlightAPI.Services.BookingService
+﻿namespace FlightAPI.Services.BookingService;
+
+public class BookingService : IBookingService
 {
-    public class BookingService : IBookingService
+    private readonly DataContext context;
+
+    public BookingService(DataContext context)
     {
-        private readonly DataContext context;
+        this.context = context;
+    }
 
-        public BookingService(DataContext context)
+    public async Task<IEnumerable<Booking>> GetBooking(int UserId)
+    {
+        var user = this.context.Users.FirstOrDefault(u => u.UserId == UserId);
+        if (user is null)
+            return null;
+        var bookings = this.context.Bookings
+            .Where(b => b.UserId == UserId)
+            .ToList();
+        if (!bookings.Any())
+            return null;
+
+        foreach (var booking in bookings)
         {
-            this.context = context;
+            context.Entry(booking).Reference(b => b.Flight).Load();
         }
 
-        public IEnumerable<Booking> GetBooking(int UserId)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Booking AddBooking(int UserId, string FlightId, Booking booking)
-        {
-            throw new NotImplementedException();
-        }
-
-
-        public List<Booking> DeleteBooking(int BookingId, int UserId)
-        {
-            throw new NotImplementedException();
-        }
-        public List<Booking> CancelBooking(int BookingId, int UserId, Booking request)
-        {
-            throw new NotImplementedException();
-        }
+        return bookings;
 
     }
+
+    public Booking AddBooking(int UserId, string FlightId, Booking booking)
+    {
+        throw new NotImplementedException();
+    }
+
+
+    public List<Booking> DeleteBooking(int BookingId, int UserId)
+    {
+        throw new NotImplementedException();
+    }
+    public List<Booking> CancelBooking(int BookingId, int UserId, Booking request)
+    {
+        throw new NotImplementedException();
+    }
+
 }
+
