@@ -1,4 +1,4 @@
-﻿using FlightAPI.Models;
+﻿using FlightAPI.Services.FlightService;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FlightAPI.Controllers
@@ -10,15 +10,18 @@ namespace FlightAPI.Controllers
 
         private readonly DataContext context;
 
-        public FlightController(DataContext context)
+        private readonly IFlightService flightService;
+
+        public FlightController(IFlightService flightService)
         {
-            this.context = context;
+            this.flightService = flightService;
         }
+
 
         [HttpGet("api/Flights")]
         public async Task<ActionResult<List<Flight>>> GetAllFlights()
         {
-            return Ok(await this.context.Flights.ToListAsync());
+            return await this.flightService.GetAllFlights();
         }
 
         [HttpGet("api/FlightFilter")]
