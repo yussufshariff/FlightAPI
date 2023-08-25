@@ -2,7 +2,7 @@
 
 namespace FlightAPI.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("/")]
     [ApiController]
     public class UsersController : ControllerBase
     {
@@ -16,7 +16,7 @@ namespace FlightAPI.Controllers
 
 
         }
-        [HttpGet("{UserId}")]
+        [HttpGet("api/User/{UserId}")]
         public async Task<ActionResult<List<User>>> GetUser(int UserId)
         {
             var user = await this.userService.GetUser(UserId);
@@ -26,7 +26,7 @@ namespace FlightAPI.Controllers
         }
 
 
-        [HttpPost]
+        [HttpPost("api/User")]
         public async Task<ActionResult<User>> CreateNewUser(User user)
         {
             try
