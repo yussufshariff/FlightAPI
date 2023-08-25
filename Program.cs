@@ -1,5 +1,7 @@
 global using FlightAPI.Data;
+global using FlightAPI.Models;
 global using Microsoft.EntityFrameworkCore;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
