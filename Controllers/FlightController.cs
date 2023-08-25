@@ -6,9 +6,6 @@ namespace FlightAPI.Controllers
     [ApiController]
     public class FlightController : ControllerBase
     {
-
-        private readonly DataContext context;
-
         private readonly IFlightService flightService;
 
         public FlightController(IFlightService flightService)

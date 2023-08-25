@@ -7,15 +7,12 @@ namespace FlightAPI.Controllers;
 [ApiController]
 public class BookingController : ControllerBase
 {
-    private readonly DataContext context;
-
     private readonly IBookingService bookingService;
 
     public BookingController(IBookingService bookingService)
     {
         this.bookingService = bookingService;
     }
-
 
 
     [HttpGet("api/Bookings")]

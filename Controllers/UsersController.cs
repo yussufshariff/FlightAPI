@@ -7,9 +7,6 @@ namespace FlightAPI.Controllers
     public class UsersController : ControllerBase
     {
 
-
-        private readonly DataContext context;
-
         private readonly IUserService userService;
 
 
