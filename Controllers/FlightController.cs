@@ -20,6 +20,19 @@ namespace FlightAPI.Controllers
             return await this.flightService.GetAllFlights();
         }
 
+
+
+        [HttpGet("api/FlightLocation")]
+        public async Task<ActionResult<List<Flight>>> GetFlightByLocation(string departure, string arrival)
+        {
+            var flights = await this.flightService.GetFlightByLocation(departure, arrival);
+
+            if (flights == null)
+                return NotFound("No flights found.");
+            return Ok(flights);
+        }
+
+
         [HttpGet("api/FlightFilter")]
         public async Task<ActionResult<List<Flight>>> GetFlightsByMonthRange(int startYear, int startMonth, int endYear, int endMonth)
         {
@@ -30,7 +43,6 @@ namespace FlightAPI.Controllers
 
             return Ok(flights);
         }
-
 
 
         [HttpGet("api/Flight/{FlightId}")]
@@ -45,7 +57,6 @@ namespace FlightAPI.Controllers
             return Ok(flight);
 
         }
-
-
     }
 }
+

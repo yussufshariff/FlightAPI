@@ -32,6 +32,15 @@
             return filteredFlights;
         }
 
+        public async Task<List<Flight>> GetFlightByLocation(string departure, string arrival)
+        {
+            var filteredLocation = await context.Flights
+                 .Where(f =>
+                     (f.Origin == departure) || (f.Destination == arrival)).ToListAsync();
+
+            return filteredLocation;
+        }
+
         public async Task<Flight> GetSingleFlight(string FlightId)
         {
             var flight = await this.context.Flights.FindAsync(FlightId);

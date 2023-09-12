@@ -5,6 +5,7 @@
         Task<List<Flight>> GetAllFlights();
         Task<List<Flight>> GetFlightsByMonthRange(int startYear, int startMonth, int endYear, int endMonth);
         Task<Flight> GetSingleFlight(string FlightId);
+        Task<List<Flight>> GetFlightByLocation(string departure, string arrival);
 
     }
 }
