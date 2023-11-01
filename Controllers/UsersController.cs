@@ -33,7 +33,7 @@ namespace FlightAPI.Controllers
             {
                 var newUser = await this.userService.CreateNewUser(user);
 
-                return CreatedAtAction(nameof(GetUser), new { id = newUser.UserId }, newUser);
+                return CreatedAtAction(nameof(CreateNewUser), new { id = newUser.UserId }, newUser);
             }
             catch (InvalidOperationException ex)
             {
