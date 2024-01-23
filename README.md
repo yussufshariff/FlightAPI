@@ -22,7 +22,7 @@ This Holiday Booking API is designed to facilitate the management of flight book
 1. Clone the repository:
 
     ```bash
-    git clone https://github.com/your-username/holiday-booking-api.git
+    git clone https://github.com/yussufshariff/holiday-booking-api.git
     ```
 
 2. Navigate to the project directory:
